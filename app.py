@@ -12,11 +12,11 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import base64
 from io import BytesIO
-import os  # CHANGE 1: Added
+import os  
 
 app = Flask(__name__)
 
-# CHANGE 2: Updated model loading
+# Updated model loading
 print("Loading model artifacts...")
 MODEL_DIR = os.path.join(os.path.dirname(__file__), 'models')
 
@@ -239,7 +239,7 @@ def predict():
 def health():
     return jsonify({'status': 'healthy', 'model': 'loaded'})
 
-# CHANGE 3: Updated for production (still works locally)
+# Updated for production (still works locally)
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
