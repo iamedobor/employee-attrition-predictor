@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Attrition Predictor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0F0F0F 0%, #245E87 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0C4269 0%, #0C4269 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .form-section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #0C4269;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #0C4269;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 8px;
+            height: 30px;
+            background: #0C4269;
+            margin-right: 15px;
+            border-radius: 4px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #0C4269;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .submit-section {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #0C4269 0%, #0C4269 100%);
+            color: white;
+            padding: 15px 60px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+        }
+
+        .submit-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #0C4269;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result-container {
+            display: none;
+            margin-top: 40px;
+            padding: 30px;
+            background: #f9fafb;
+            border-radius: 15px;
+        }
+
+        .result-container.active {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .prediction-box {
+            text-align: center;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .prediction-box.leave {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .prediction-box.stay {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .prediction-box h2 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .prediction-box .probability {
+            font-size: 3em;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .prediction-box p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        .shap-explanation {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .shap-explanation h3 {
+            color: #1e40af;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .shap-explanation img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        /* NEW: Interpretation Guide Section */
+        .interpretation-guide {
+            background: #eff6ff;
+            padding: 20px 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border-left: 5px solid #3b82f6;
+        }
+
+        .interpretation-guide h4 {
+            color: #1e40af;
+            font-size: 1.1em;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .interpretation-guide ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .interpretation-guide li {
+            color: #374151;
+            padding: 8px 0;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        /* NEW: Recommendations Section */
+        .recommendations {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .recommendations h3 {
+            color: #1e40af;
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .recommendations-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .recommendations-list li {
+            background: #f9fafb;
+            padding: 15px 20px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+            color: #374151;
+            font-size: 1em;
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+
+        .recommendations-list li:hover {
+            background: #f3f4f6;
+            transform: translateX(5px);
+        }
+
+        .recommendations-list.high-risk li {
+            border-left-color: #ef4444;
+        }
+
+        .recommendations-list.low-risk li {
+            border-left-color: #10b981;
+        }
+
+        .error-message {
+            display: none;
+            background: #fee2e2;
+            border: 2px solid #ef4444;
+            color: #991b1b;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        .back-btn {
+            background: white;
+            color: #3b82f6;
+            padding: 12px 30px;
+            border: 2px solid #3b82f6;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #3b82f6;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .prediction-box .probability {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Employee Attrition Predictor</h1>
+            <p>Predict employee turnover risk using AI-powered analysis</p>
+        </div>
+
+        <div class="content">
+            <form id="predictionForm">
+                <!-- Personal Information -->
+                <div class="form-section">
+                    <h2 class="section-title">👤 Personal Information</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="Age">Age</label>
+                            <input type="number" id="Age" name="Age" min="18" max="60" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="Gender">Gender</label>
+                            <select id="Gender" name="Gender" required>
+                                <option value="">Select Gender</option>
+                                {% for option in categorical_options['Gender'] %}
+                                <option value="{{ option }}">{{ option }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="MaritalStatus">Marital Status</label>
+                            <select id="MaritalStatus" name="MaritalStatus" required>
+                                <option value="">Select Status</option>
+                                {% for option in categorical_options['MaritalStatus'] %}
+                                <option value="{{ option }}">{{ option }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="DistanceFromHome">Distance From Home (miles)</label>
+                            <input type="number" id="DistanceFromHome" name="DistanceFromHome" min="1" max="29" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="Education">Education Level (1-5)</label>
+                            <input type="number" id="Education" name="Education" min="1" max="5" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="EducationField">Education Field</label>
+                            <select id="EducationField" name="EducationField" required>
+                                <option value="">Select Field</option>
+                                {% for option in categorical_options['EducationField'] %}
+                                <option value="{{ option }}">{{ option }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Job Details -->
+                <div class="form-section">
+                    <h2 class="section-title">💼 Job Details</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="Department">Department</label>
+                            <select id="Department" name="Department" required>
+                                <option value="">Select Department</option>
+                                {% for option in categorical_options['Department'] %}
+                                <option value="{{ option }}">{{ option }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="JobRole">Job Role</label>
+                            <select id="JobRole" name="JobRole" required>
+                                <option value="">Select Role</option>
+                                {% for option in categorical_options['JobRole'] %}
+                                <option value="{{ option }}">{{ option }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="BusinessTravel">Business Travel</label>
+                            <select id="BusinessTravel" name="BusinessTravel" required>
+                                <option value="">Select Travel Frequency</option>
+                                {% for option in categorical_options['BusinessTravel'] %}
+                                <option value="{{ option }}">{{ option }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="OverTime">Overtime</label>
+                            <select id="OverTime" name="OverTime" required>
+                                <option value="">Select Option</option>
+                                {% for option in categorical_options['OverTime'] %}
+                                <option value="{{ option }}">{{ option }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Compensation -->
+                <div class="form-section">
+                    <h2 class="section-title">💰 Compensation & Benefits</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="MonthlyIncome">Monthly Income ($)</label>
+                            <input type="number" id="MonthlyIncome" name="MonthlyIncome" min="1009" max="19999" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="MonthlyRate">Monthly Rate ($)</label>
+                            <input type="number" id="MonthlyRate" name="MonthlyRate" min="2094" max="26999" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="HourlyRate">Hourly Rate ($)</label>
+                            <input type="number" id="HourlyRate" name="HourlyRate" min="30" max="100" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="DailyRate">Daily Rate ($)</label>
+                            <input type="number" id="DailyRate" name="DailyRate" min="102" max="1499" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="PercentSalaryHike">Percent Salary Hike (%)</label>
+                            <input type="number" id="PercentSalaryHike" name="PercentSalaryHike" min="11" max="25" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="StockOptionLevel">Stock Option Level (0-3)</label>
+                            <input type="number" id="StockOptionLevel" name="StockOptionLevel" min="0" max="3" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Work Satisfaction -->
+                <div class="form-section">
+                    <h2 class="section-title">📊 Work Satisfaction</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="JobSatisfaction">Job Satisfaction (1-4)</label>
+                            <input type="number" id="JobSatisfaction" name="JobSatisfaction" min="1" max="4" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="EnvironmentSatisfaction">Environment Satisfaction (1-4)</label>
+                            <input type="number" id="EnvironmentSatisfaction" name="EnvironmentSatisfaction" min="1" max="4" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="RelationshipSatisfaction">Relationship Satisfaction (1-4)</label>
+                            <input type="number" id="RelationshipSatisfaction" name="RelationshipSatisfaction" min="1" max="4" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="WorkLifeBalance">Work-Life Balance (1-4)</label>
+                            <input type="number" id="WorkLifeBalance" name="WorkLifeBalance" min="1" max="4" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="JobInvolvement">Job Involvement (1-4)</label>
+                            <input type="number" id="JobInvolvement" name="JobInvolvement" min="1" max="4" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Career History -->
+                <div class="form-section">
+                    <h2 class="section-title">📈 Career History</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="TotalWorkingYears">Total Working Years</label>
+                            <input type="number" id="TotalWorkingYears" name="TotalWorkingYears" min="0" max="40" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="YearsAtCompany">Years At Company</label>
+                            <input type="number" id="YearsAtCompany" name="YearsAtCompany" min="0" max="40" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="YearsInCurrentRole">Years In Current Role</label>
+                            <input type="number" id="YearsInCurrentRole" name="YearsInCurrentRole" min="0" max="18" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="YearsSinceLastPromotion">Years Since Last Promotion</label>
+                            <input type="number" id="YearsSinceLastPromotion" name="YearsSinceLastPromotion" min="0" max="15" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="NumCompaniesWorked">Number of Companies Worked</label>
+                            <input type="number" id="NumCompaniesWorked" name="NumCompaniesWorked" min="0" max="9" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="TrainingTimesLastYear">Training Times Last Year</label>
+                            <input type="number" id="TrainingTimesLastYear" name="TrainingTimesLastYear" min="0" max="6" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="submit-section">
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        🔮 Predict Attrition Risk
+                    </button>
+                </div>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Analyzing employee data...</p>
+            </div>
+
+            <div class="error-message" id="errorMessage"></div>
+
+            <div class="result-container" id="resultContainer">
+                <div class="prediction-box" id="predictionBox">
+                    <h2 id="predictionText">Prediction</h2>
+                    <div class="probability" id="probability">0%</div>
+                    <p id="predictionDescription">Description</p>
+                </div>
+
+                <!-- NEW: Interpretation Guide -->
+                <div class="interpretation-guide" id="interpretationGuide">
+                    <h4>📖 How to Read the Analysis</h4>
+                    <ul id="interpretationList"></ul>
+                </div>
+
+                <div class="shap-explanation">
+                    <h3>📊 Feature Contribution Analysis (SHAP)</h3>
+                    <p style="text-align: center; color: #6b7280; margin-bottom: 20px;">
+                        Understanding which factors influence this prediction
+                    </p>
+                    <img id="shapPlot" src="" alt="SHAP Explanation">
+                </div>
+
+                <!-- NEW: Recommendations Section -->
+                <div class="recommendations" id="recommendationsSection">
+                    <h3 id="recommendationsTitle">💡 Recommendations</h3>
+                    <ul class="recommendations-list" id="recommendationsList"></ul>
+                </div>
+
+                <div style="text-align: center;">
+                    <button class="back-btn" onclick="resetForm()">⬅️ Make Another Prediction</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('predictionForm');
+        const loading = document.getElementById('loading');
+        const resultContainer = document.getElementById('resultContainer');
+        const errorMessage = document.getElementById('errorMessage');
+        const submitBtn = document.getElementById('submitBtn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = value;
+            });
+
+            loading.classList.add('active');
+            resultContainer.classList.remove('active');
+            errorMessage.classList.remove('active');
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'Prediction failed');
+                }
+
+                displayResults(result);
+                
+            } catch (error) {
+                errorMessage.textContent = `Error: ${error.message}`;
+                errorMessage.classList.add('active');
+            } finally {
+                loading.classList.remove('active');
+                submitBtn.disabled = false;
+            }
+        });
+
+        function displayResults(result) {
+            const predictionBox = document.getElementById('predictionBox');
+            const predictionText = document.getElementById('predictionText');
+            const probability = document.getElementById('probability');
+            const predictionDescription = document.getElementById('predictionDescription');
+            const shapPlot = document.getElementById('shapPlot');
+            
+            // NEW: Get recommendation elements
+            const recommendationsList = document.getElementById('recommendationsList');
+            const interpretationList = document.getElementById('interpretationList');
+            const recommendationsTitle = document.getElementById('recommendationsTitle');
+
+            const willLeave = result.prediction === 1;
+            predictionBox.className = 'prediction-box ' + (willLeave ? 'leave' : 'stay');
+            
+            predictionText.textContent = result.prediction_text;
+            probability.textContent = Math.round(result.confidence * 100) + '%';
+            
+            if (willLeave) {
+                predictionDescription.textContent = `This employee has a ${Math.round(result.probability_leave * 100)}% likelihood of leaving the company. Consider retention strategies.`;
+                recommendationsTitle.textContent = '⚠️ Recommended Retention Actions';
+                recommendationsList.className = 'recommendations-list high-risk';
+            } else {
+                predictionDescription.textContent = `This employee has a ${Math.round(result.probability_stay * 100)}% likelihood of staying with the company.`;
+                recommendationsTitle.textContent = '✅ Retention Success Factors';
+                recommendationsList.className = 'recommendations-list low-risk';
+            }
+
+            shapPlot.src = 'data:image/png;base64,' + result.shap_plot;
+
+            // NEW: Display recommendations
+            recommendationsList.innerHTML = '';
+            if (result.recommendations && result.recommendations.length > 0) {
+                result.recommendations.forEach(rec => {
+                    const li = document.createElement('li');
+                    li.textContent = rec;
+                    recommendationsList.appendChild(li);
+                });
+            }
+
+            // NEW: Display interpretation guide
+            interpretationList.innerHTML = '';
+            if (result.interpretation_guide && result.interpretation_guide.length > 0) {
+                result.interpretation_guide.forEach(guide => {
+                    const li = document.createElement('li');
+                    li.textContent = guide;
+                    interpretationList.appendChild(li);
+                });
+            }
+
+            resultContainer.classList.add('active');
+            resultContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function resetForm() {
+            form.reset();
+            resultContainer.classList.remove('active');
+            errorMessage.classList.remove('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
