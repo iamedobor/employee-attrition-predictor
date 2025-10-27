@@ -2,9 +2,26 @@
 
 An AI-powered web application that predicts employee turnover risk using machine learning and provides actionable retention recommendations with SHAP explainability.
 
-![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
+![Python](https://img.shields.io/badge/Python-3.11.9-blue.svg)
 ![Flask](https://img.shields.io/badge/Flask-3.0.0-green.svg)
-![scikit-learn](https://img.shields.io/badge/scikit--learn-1.5.1-orange.svg)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-1.3.2-orange.svg)
+
+---
+
+## 📊 Demo
+
+**🌐 Live Demo:** https://employee-attrition-predictor-noty.onrender.com
+
+### Screenshots
+
+**Main Interface:**
+![App Interface](docs/screenshots/interface.png)
+
+**Prediction Results with SHAP Analysis:**
+![Prediction Results](docs/screenshots/prediction.png)
+
+**Retention Recommendations:**
+![Recommendations](docs/screenshots/recommendations.png)
 
 ---
 
@@ -53,20 +70,35 @@ http://localhost:5000
 ## 📁 Project Structure
 ```
 employee-attrition-predictor/
-├── app.py                      # Flask application
-├── templates/                  # HTML templates
+├── .python-version
+├── .gitignore
+├── runtime.txt
+├── render.yaml
+├── README.md
+├── requirements.txt
+├── app.py
+├── templates/
 │   └── index.html
-├── models/                     # Trained ML models
+├── models/
 │   ├── attrition_model.pkl
 │   ├── scaler.pkl
-│   └── ... (other model files)
-├── training/                   # Model training
+│   ├── label_encoders.pkl
+│   ├── feature_names.pkl
+│   ├── shap_explainer.pkl
+│   ├── numerical_cols.pkl
+│   ├── categorical_cols.pkl
+│   └── metadata.pkl
+├── training/
 │   ├── notebooks/
 │   │   └── Employee Attrition Prediction System.ipynb
 │   └── data/
 │       └── IBM HR Analytics Dataset.csv
-├── requirements.txt            # Python dependencies
-└── README.md                   # This file
+└── docs/
+    └── screenshots/
+        ├── interface.png
+        ├── prediction.png
+        └── recommendations.png
+
 ```
 
 ---
