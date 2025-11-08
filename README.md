@@ -23,15 +23,19 @@ This project demonstrates an employee attrition prediction system I originally d
 ### Screenshots
 
 **Main Interface:**
+
 ![App Interface](docs/screenshots/interface.png)
 
 **Prediction Results:**
+
 ![Prediction Results](docs/screenshots/prediction.png)
 
 **SHAP Explainability:**
+
 ![Prediction with SHAP Explainability](docs/screenshots/shap.png)
 
 **Retention Recommendations:**
+
 ![Recommendations](docs/screenshots/recommendations.png)
 
 ---
