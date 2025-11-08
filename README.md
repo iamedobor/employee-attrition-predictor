@@ -28,7 +28,7 @@ This project demonstrates an employee attrition prediction system I originally d
 **Prediction Results:**
 ![Prediction Results](docs/screenshots/prediction.png)
 
-**SHAP Ex:**
+**SHAP Explainability:**
 ![Prediction with SHAP Explainability](docs/screenshots/shap.png)
 
 **Retention Recommendations:**
