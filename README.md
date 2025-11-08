@@ -16,7 +16,7 @@ An AI-powered web application that predicts employee turnover risk using machine
 ---
 ## 📝 Note
 
-This project demonstrates an employee attrition prediction system I originally developed for a hospitality business to analyse and predict staff turnover trends.This public version uses the IBM HR Analytics dataset from Kaggle to protect client confidentiality, but replicates the same workflow, logic, and deployment process.
+This project demonstrates an employee attrition prediction system I originally developed for a hospitality business to analyse and predict staff turnover trends. This public version uses the IBM HR Analytics dataset from Kaggle to protect client confidentiality, but replicates the same workflow, logic, and deployment process.
 
 ---
 
