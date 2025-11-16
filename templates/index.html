@@ -346,6 +346,32 @@
             color: white;
         }
 
+        /* Footer Styles */
+        footer {
+            background-color: #0C4269;
+            color: #ecf0f1;
+            text-align: center;
+            padding: 25px 20px;
+            margin-top: 50px;
+        }
+
+        footer p {
+            margin: 8px 0;
+            font-size: 0.95em;
+        }
+
+        footer a {
+            color: #60a5fa;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: #93c5fd;
+            text-decoration: underline;
+        }
+
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 1.8em;
@@ -357,6 +383,14 @@
             
             .prediction-box .probability {
                 font-size: 2em;
+            }
+
+            footer {
+                padding: 20px 15px;
+            }
+
+            footer p {
+                font-size: 0.9em;
             }
         }
     </style>
@@ -595,6 +629,12 @@
             </div>
         </div>
     </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 Employee Attrition Prediction System. All rights reserved.</p>
+        <p>Developed by <a href="https://portfolio.edoborosasere.com/" target="_blank" rel="noopener noreferrer">Osasere Edobor</a></p>
+    </footer>
 
     <script>
         const form = document.getElementById('predictionForm');
